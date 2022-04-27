@@ -1,10 +1,12 @@
-
+package records.interfaces;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import javax.swing.JFileChooser;
@@ -48,6 +50,7 @@ public class Osobe extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dodavanje osoba u evidenciju ");
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/records/icons/logo.png")));
 
         ime_TF.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         ime_TF.setForeground(new java.awt.Color(102, 102, 102));
@@ -94,7 +97,7 @@ public class Osobe extends javax.swing.JFrame {
 
         doktorske_CB.setText("doktorske studije");
 
-        jPanel2.setBackground(new java.awt.Color(0, 153, 204));
+        jPanel2.setBackground(new java.awt.Color(70, 130, 180));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 27)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(255, 255, 255));
@@ -131,11 +134,11 @@ public class Osobe extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Ime", "Prezime", "JMBG", "Tip"
+                "ID", "Ime", "Prezime", "JMBG", "Tip", "Godina studija", "Studije"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -268,7 +271,7 @@ public class Osobe extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         upisiPodatke();
-        this.ID_TF.setText(String.valueOf(Integer.parseInt(this.ID_TF.getText())+1));
+        this.ID_TF.setText(String.valueOf(Integer.parseInt(this.ID_TF.getText()) + 1));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -285,14 +288,11 @@ public class Osobe extends javax.swing.JFrame {
     }
 
     private void upisiPodatke() {
-        JFileChooser jFileChooser = new JFileChooser();
-        jFileChooser.showSaveDialog(this);
-        File datoteka = jFileChooser.getSelectedFile();
+        FileWriter myWriter;
         try {
-            FileWriter fileWriter = new FileWriter(datoteka, true);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
+            myWriter = new FileWriter("filename.txt");
             String podaci = this.ID_TF.getText() + "/" + this.ime_TF.getText() + "/" + this.prezime_TF.getText() + "/" + this.JMBG_TF.getText();
+
             if (this.student_RB.isSelected()) {
                 podaci = podaci + "/student";
             } else if (this.profesor_RB.isSelected()) {
@@ -300,6 +300,7 @@ public class Osobe extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Niste odabrali tip osobe!");
             }
+            podaci = podaci + "/" + (String) this.jComboBox1.getSelectedItem();
             if (this.osnovne_CB.isSelected()) {
                 podaci = podaci + "/osnovne";
             } else if (this.master_CB.isSelected()) {
@@ -309,38 +310,28 @@ public class Osobe extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "Niste odabrali vrstu studija osobe!");
             }
-            bufferedWriter.close();
+            myWriter.write(podaci);
+            myWriter.close();
         } catch (Exception e) {
         }
     }
 
     private void prikazi(JTable jTable) {
-        DefaultTableModel defaultTableModel = new DefaultTableModel();
-        defaultTableModel.addColumn("ID");
-        defaultTableModel.addColumn("Ime");
-        defaultTableModel.addColumn("Prezime");
-        defaultTableModel.addColumn("JMBG");
-        defaultTableModel.addColumn("Tip");
-        defaultTableModel.addColumn("Godina studija");
-        defaultTableModel.addColumn("Studije");
+        DefaultTableModel defaultTableModel = (DefaultTableModel) jTable.getModel();
 
-        String red = "";
-
-        JFileChooser jFileChooser = new JFileChooser();
-        jFileChooser.showOpenDialog(this);
-        File datoteka = jFileChooser.getSelectedFile();
-
+        String text = null;
         try {
-            FileInputStream fileInputStream = new FileInputStream(datoteka);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-            while ((red = bufferedReader.readLine()) != null) {
-                defaultTableModel.addRow(red.split("/"));
+            FileReader fr = new FileReader("filename.txt");
+            char[] a = new char[50];
+            fr.read(a);
+            for (char c : a) {
+                text += c;
             }
-            bufferedReader.close();
+            text = text.replace("null", "");
+            defaultTableModel.addRow(text.split("/"));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Nemoguće prikazati podatke u tabeli!");
         }
-        
         this.jTable1.getColumnModel().getColumn(0).setMaxWidth(50);
     }
 
